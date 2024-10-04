@@ -1,0 +1,47 @@
+#include <ESP8266WiFi.h>
+#include <FirebaseESP8266.h>
+
+// WiFi credentials
+const char* ssid = "@ba_sithuu";  // WiFi SSID
+const char* password = "12345678"; // WiFi Password
+
+// Firebase credentials
+#define FIREBASE_HOST "iotproject-a160b.firebaseio.com"  // Your Firebase Project ID
+#define FIREBASE_AUTH "hWLMj8Ipy1ZGFdepzrPqcHNxi3N5RRmW2fJDWgj8"            // Your Firebase Database Secret or Authentication Key
+
+FirebaseData firebaseData;
+
+void setup() {
+  pinMode(D4, OUTPUT);
+  Serial.begin(9600);
+  Serial.println();
+
+  // Connect to Wi-Fi
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+  Serial.print("Connected, IP address: ");
+  Serial.println(WiFi.localIP());
+
+  // Initialize Firebase connection
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+  Firebase.reconnectWiFi(true);
+}
+
+void loop() {
+  // Reading data from Firebase
+  if (Firebase.getInt(firebaseData, "/path-to-your-field1")) {
+    int A = firebaseData.intData();
+    Serial.println(A);
+    digitalWrite(D4, A);  // Set D4 high or low based on the data from Firebase
+  } else {
+    Serial.println("Failed to get data from Firebase");
+    Serial.println(firebaseData.errorReason());
+  }
+
+  delay(1000);  // Adjust delay as necessary
+}
